@@ -5,13 +5,28 @@ module T = Ppxlib.Ast_builder.Default
 
 (* { pld_name; pld_mutable; pld_type; pld_loc; pld_attributes } *)
 
-let expr_of_rec_labels ~loc (rs : label_declaration list) =
-  let final_record = T.pexp_record ~loc (rs |> List.map (fun r ->
-      let ident = { txt = Longident.Lident r.pld_name.txt; loc = r.pld_name.loc } in
-      (ident , T.pexp_ident ~loc:r.pld_name.loc ident)
+let expr_of_rec_labels ~loc (rls : label_declaration list) =
+  let final_record = T.pexp_record ~loc (rls |> List.map (fun rl ->
+      let loc = rl.pld_name.loc in
+      let ident = { txt = Longident.Lident rl.pld_name.txt; loc } in
+      (ident , T.pexp_ident ~loc ident)
     )) None in
   let suc = [%expr succeed [%e final_record]] in
-  suc
+  rls
+  |> List.rev
+  |> List.fold_left (fun acc_expr rl ->
+      let loc = rl.pld_name.loc in
+      let rl_pname = T.pvar ~loc rl.pld_name.txt in
+      let rl_ename_str = T.pexp_constant ~loc (Pconst_string (rl.pld_name.txt, None)) in
+      let rl_type = rl.pld_type in
+      let rl_etype_decoder = match rl.pld_type.ptyp_desc with
+        | Ptyp_constr (_, _)
+        | _ -> T.evar ~loc "string"
+      in
+      [%expr field [%e rl_ename_str] [%e rl_etype_decoder] >>=
+        fun ([%p rl_pname] : [%t rl_type]) ->
+        [%e acc_expr]]
+    ) suc
 
 
 let of_td ~loc (td: Ppxlib.type_declaration) =
@@ -22,7 +37,7 @@ let of_td ~loc (td: Ppxlib.type_declaration) =
        ; loc })
   in
   match td.ptype_kind with
-  | Ppxlib.Ptype_record rs ->
+  | Ppxlib.Ptype_record rls ->
     [
       T.pstr_module ~loc
         { pmb_name = {txt = (Printf.sprintf "Decode_%s" n); loc }
@@ -38,7 +53,7 @@ let of_td ~loc (td: Ppxlib.type_declaration) =
                  [ [%stri open D]
                  ; [%stri
                    let [%p f_name] : [%t f_type] =
-                     [%e expr_of_rec_labels ~loc rs]]
+                     [%e expr_of_rec_labels ~loc rls]]
                  ]
               )
         ; pmb_attributes = []
