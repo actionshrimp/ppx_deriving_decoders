@@ -20,6 +20,7 @@ let expr_of_rec_labels ~loc (rls : label_declaration list) =
       let rl_ename_str = T.pexp_constant ~loc (Pconst_string (rl.pld_name.txt, None)) in
       let rl_type = rl.pld_type in
       let rl_etype_decoder = match rl.pld_type.ptyp_desc with
+        | Ptyp_constr ({ txt = Longident.Lident a; _ }, []) -> T.evar ~loc a
         | Ptyp_constr (_, _)
         | _ -> T.evar ~loc "string"
       in
