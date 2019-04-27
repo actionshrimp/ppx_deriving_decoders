@@ -28,7 +28,7 @@ let of_td ~loc (td: Ppxlib.type_declaration) =
        }
     ]
   | _ ->
-    failwith (Printf.sprintf "Unsupported type for deriving decoders: %s" n)
+    []
 
 let str_type_decl ~loc ~path:_ (_rf, tds) =
   tds
