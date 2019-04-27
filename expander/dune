@@ -1,0 +1,6 @@
+(library
+  (name ppx_deriving_decoders_expander)
+  (public_name ppx_deriving_decoders.expander)
+  (libraries base ppxlib)
+  (ppx_runtime_libraries ppx_deriving_decoders.runtime-lib)
+  (preprocess (pps ppxlib.metaquot)))

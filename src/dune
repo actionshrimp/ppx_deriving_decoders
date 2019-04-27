@@ -1,0 +1,6 @@
+(library
+  (name ppx_deriving_decoders)
+  (public_name ppx_deriving_decoders)
+  (kind ppx_deriver)
+  (libraries ppxlib ppx_deriving_decoders_expander)
+  (preprocess no_preprocessing))

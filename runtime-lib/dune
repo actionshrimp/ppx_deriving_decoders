@@ -1,0 +1,5 @@
+(library
+  (name ppx_deriving_decoders_lib)
+  (public_name ppx_deriving_decoders.runtime-lib)
+  (libraries decoders)
+  (preprocess no_preprocessing))
