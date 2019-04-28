@@ -1,6 +1,6 @@
 (library
   (name ppx_deriving_decoders_test)
-  (libraries decoders)
+  (libraries decoders decoders-yojson)
   (inline_tests)
   (flags :standard -w -30)
   (preprocess (pps ppxlib ppx_deriving_decoders ppx_inline_test ppx_expect)))

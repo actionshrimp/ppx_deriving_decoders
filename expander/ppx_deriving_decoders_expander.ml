@@ -2,8 +2,7 @@ open Ppxlib
 
 module T = Ppxlib.Ast_builder.Default
 
-
-(* { pld_name; pld_mutable; pld_type; pld_loc; pld_attributes } *)
+(* let rec decoder_expr_of_rec_label_type rlt = *)
 
 let expr_of_rec_labels ~loc (rls : label_declaration list) =
   let final_record = T.pexp_record ~loc (rls |> List.map (fun rl ->
@@ -20,9 +19,9 @@ let expr_of_rec_labels ~loc (rls : label_declaration list) =
       let rl_ename_str = T.pexp_constant ~loc (Pconst_string (rl.pld_name.txt, None)) in
       let rl_type = rl.pld_type in
       let rl_etype_decoder = match rl.pld_type.ptyp_desc with
-        | Ptyp_constr ({ txt = Longident.Lident a; _ }, []) -> T.evar ~loc a
-        | Ptyp_constr (_, _)
-        | _ -> T.evar ~loc "string"
+        | Ptyp_constr ({ txt = Longident.Lident "int"; _ }, []) -> [%expr int]
+        | Ptyp_constr ({ txt = Longident.Lident "string"; _ }, []) -> [%expr string]
+        | _ -> T.evar ~loc "_"
       in
       [%expr field [%e rl_ename_str] [%e rl_etype_decoder] >>=
         fun ([%p rl_pname] : [%t rl_type]) ->

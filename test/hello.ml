@@ -1,7 +1,11 @@
 type test_type =
-  { hello : int
-  ; there : string
+  { name : string
+  ; age : int
+  ; details : string list
   } [@@deriving_inline decoder]
 [@@@end]
 
-let x = 3
+type test_type_using =
+  { test : test_type list
+  } [@@deriving_inline decoder]
+[@@@end]
