@@ -16,7 +16,7 @@ let expr_of_rec_labels ~loc (rls : label_declaration list) =
   |> List.fold_left (fun acc_expr rl ->
       let loc = rl.pld_name.loc in
       let rl_pname = T.pvar ~loc rl.pld_name.txt in
-      let rl_ename_str = T.pexp_constant ~loc (Pconst_string (rl.pld_name.txt, None)) in
+      let rl_ename_str = T.pexp_constant ~loc (Pconst_string (rl.pld_name.txt, loc, None)) in
       let rl_type = rl.pld_type in
       let rl_etype_decoder = match rl.pld_type.ptyp_desc with
         | Ptyp_constr ({ txt = Longident.Lident "int"; _ }, []) -> [%expr int]
@@ -40,10 +40,9 @@ let of_td ~loc (td: Ppxlib.type_declaration) =
   | Ppxlib.Ptype_record rls ->
     [
       T.pstr_module ~loc
-        { pmb_name = {txt = (Printf.sprintf "Decode_%s" n); loc }
+        { pmb_name = {txt = Some (Printf.sprintf "Decode_%s" n); loc }
         ; pmb_expr =
-            T.pmod_functor ~loc {txt = "D"; loc }
-              (Some decode_mod_sig)
+            T.pmod_functor ~loc (Named ({txt = Some "D"; loc } , decode_mod_sig))
               (let f_name = T.pvar ~loc (Printf.sprintf "decode_%s" n) in
                let f_type =
                  T.ptyp_constr ~loc {txt = (Longident.Lident "decoder"); loc }
